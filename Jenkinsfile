@@ -34,7 +34,7 @@ node() {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
     oc delete configmap openapi --ignore-not-found
-    oc create configmap openapi --from-file="specs/openapi-spec.json"
+    oc create configmap openapi --from-file="openapi-spec.json"
     """
   }
 
