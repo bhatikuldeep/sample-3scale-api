@@ -40,7 +40,7 @@ node() {
   }
 
   stage("Import OpenAPI") {
-    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "swagger.json", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
+    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "/specs/swagger.json", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
     if (publicStagingBaseURL != null) {
         tooboxArgs += "--staging-public-base-url=${publicStagingBaseURL}"
     }
