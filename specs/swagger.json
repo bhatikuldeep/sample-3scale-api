@@ -1,228 +1,233 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "OpenAPI Specification for the Apigee mock target service endpoint.",
-    "version": "1.0.0",
-    "title": "Mock Target API"
+    "title": "httpbin.org",
+    "description": "API Management facade for a very handy and free online HTTP tool.",
+    "version": "1.0"
   },
-  "host": "mocktarget.apigee.net",
+  "host": "httpbin.org",
   "schemes": [
     "http",
     "https"
   ],
-  "securityDefinitions": {
-    "basicAuth": {
-      "type": "basic",
-      "description": "HTTP Basic Authentication."
-    }
-  },
   "paths": {
-    "/": {
+    "/status/{code}": {
       "get": {
-        "summary": "View personalized greeting",
-        "operationId": "View a personalized greeting",
-        "description": "View a personalized greeting for the specified or guest user.",
-        "produces": [
-          "text/plain"
-        ],
+        "description": "Returns provided HTTP Status code.",
+        "operationId": "/status",
         "parameters": [{
-          "name": "user",
-          "in": "query",
-          "description": "Your user name.",
-          "required": false,
-          "type": "string"
+          "name": "code",
+          "in": "path",
+          "description": "HTTP code to return.",
+          "required": true,
+          "type": "number",
+          "default": 200,
+          "enum": [
+            200
+          ]
         }],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "responses": {}
       }
     },
-    "/help": {
+    "/get": {
       "get": {
-        "summary": "Get help",
-        "operationId": "Get help",
-        "description": "View help information about available resources in HTML format.",
-        "produces": [
-          "text/html"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "description": "Returns GET data.",
+        "operationId": "/get",
+        "responses": {}
       }
     },
-    "/user": {
-      "get": {
-        "summary": "View personalized greeting",
-        "operationId": "View personalized greeting",
-        "description": "View a personalized greeting for the specified or guest user.",
-        "produces": [
-          "text/plain"
-        ],
-        "parameters": [{
-          "name": "user",
-          "in": "query",
-          "description": "Your user name.",
-          "required": false,
-          "type": "string"
-        }],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+    "/post": {
+      "post": {
+        "description": "Returns POST data.",
+        "operationId": "/post",
+        "responses": {}
       }
     },
-    "/iloveapis": {
-      "get": {
-        "summary": "View API affirmation",
-        "operationId": "View API affirmation",
-        "description": "View API affirmation in HTML format.",
-        "produces": [
-          "text/html"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+    "/patch": {
+      "patch": {
+        "description": "Returns PATCH data.",
+        "operationId": "/patch",
+        "responses": {}
       }
     },
-    "/ip": {
-      "get": {
-        "summary": "View IP address",
-        "operationId": "View IP address",
-        "description": "View the IP address of the client in JSON format.",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+    "/put": {
+      "put": {
+        "description": "Returns PUT data.",
+        "operationId": "/put",
+        "responses": {}
+      }
+    },
+    "/delete": {
+      "delete": {
+        "description": "Returns DELETE data.",
+        "operationId": "/delete",
+        "responses": {}
       }
     },
     "/xml": {
       "get": {
-        "summary": "View XML response",
-        "operationId": "View XML response",
-        "description": "View a sample response in XML format.",
-        "produces": [
-          "application/xml"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "description": "Returns some XML.",
+        "operationId": "/xml",
+        "responses": {}
       }
     },
-    "/json": {
+    "/ip": {
       "get": {
-        "summary": "View JSON response",
-        "operationId": "View JSON response",
-        "description": "View a sample response in JSON format.",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "description": "Returns origin IP.",
+        "operationId": "/ip",
+        "responses": {}
       }
     },
-    "/echo": {
+    "/user-agent": {
       "get": {
-        "summary": "View request headers and body",
-        "operationId": "View request headers and body",
-        "description": "View the request headers and body in JSON format.",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      },
-      "post": {
-        "summary": "Send request and view request headers and body",
-        "produces": [
-          "application/json",
-          "application/xml",
-          "application/x-www-form-urlencoded"
-        ],
-        "operationId": "Send request and view request headers and body",
-        "description": "Send a request and view the resulting request headers and body in JSON format.<p>The request payload can be specified using one of the following formats: application/json, application/x-www-form-urlencoded, or application/xml.",
+        "description": "Returns user agent string.",
+        "operationId": "/user-agent",
+        "responses": {}
+      }
+    },
+    "/headers": {
+      "get": {
+        "description": "Returns headers dictionary.",
+        "operationId": "/headers",
+        "responses": {}
+      }
+    },
+    "/delay/{seconds}": {
+      "get": {
+        "description": "Delays responding for n–10 seconds.",
+        "operationId": "/delay",
         "parameters": [{
-          "name": "body",
-          "in": "body",
-          "description": "Request payload in application/json, application/x-www-form-urlencoded, or application/xml format.",
-          "required": true,
-          "schema": {
-            "$ref": "#/definitions/request-body"
-          }
-        }],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/statuscode/{code}": {
-      "get": {
-        "summary": "View status code and message",
-        "operationId": "View status code and message",
-        "description": "View status code and message for the specified value.",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [{
-          "name": "code",
+          "name": "seconds",
           "in": "path",
-          "description": "HTTP status code.",
+          "description": "",
           "required": true,
-          "type": "string"
+          "type": "string",
+          "default": 2,
+          "enum": [
+            2
+          ]
         }],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "responses": {}
       }
     },
-    "/auth": {
+    "/cache/{maxAge}": {
       "get": {
-        "security": [{
-          "basicAuth": []
+        "operationId": "/cache",
+        "description": "Sets a Cache-Control header for n seconds.",
+        "parameters": [{
+          "name": "maxAge",
+          "in": "path",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "default": 10,
+          "enum": [
+            10
+          ]
         }],
-        "summary": "Validate access using basic authentication",
-        "operationId": "Validate access using basic authentication",
-        "description": "Validate access using basic authentication.",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        "responses": {}
       }
-    }
-  },
-  "definitions": {
-    "request-body": {
-      "properties": {
-        "replace-me": {
-          "type": "object",
-          "description": "Replace with request payload in application/json, application/x-www-form-urlencoded, or application/xml format."
-        }
+    },
+    "/uuid": {
+      "get": {
+        "operationId": "/uuid",
+        "description": "Returns UUID4.",
+        "responses": {}
+      }
+    },
+    "/anything": {
+      "get": {
+        "operationId": "/anything",
+        "description": "Returns request data, including method used.",
+        "responses": {}
+      }
+    },
+    "/gzip": {
+      "get": {
+        "operationId": "/gzip",
+        "description": "Returns gzip-encoded data.",
+        "responses": {}
+      }
+    },
+    "/base64/{value}": {
+      "get": {
+        "operationId": "/base64",
+        "description": "Decodes base64url-encoded string.",
+        "parameters": [{
+          "name": "value",
+          "in": "path",
+          "description": "Base64 encoded string.",
+          "required": true,
+          "type": "string",
+          "default": "aGVsbG8gd29ybGQNCg%3D%3D"
+        }],
+        "responses": {}
+      }
+    },
+    "/deflate": {
+      "get": {
+        "operationId": "/deflate",
+        "description": "Returns deflate-encoded data.",
+        "responses": {}
+      }
+    },
+    "/brotli": {
+      "get": {
+        "operationId": "/brotli",
+        "description": "Returns brotli-encoded data.",
+        "responses": {}
+      }
+    },
+    "/response-headers": {
+      "get": {
+        "operationId": "/response-headers",
+        "description": "Returns key-value query parameters as response headers.",
+        "responses": {}
+      }
+    },
+    "/bytes/{number}": {
+      "get": {
+        "operationId": "/bytes",
+        "description": "Generates n random bytes of binary data",
+        "parameters": [{
+          "name": "number",
+          "in": "path",
+          "description": "Number of bytes to return.",
+          "required": true,
+          "type": "string",
+          "default": "1024"
+        }],
+        "responses": {}
+      }
+    },
+    "/redirect-to": {
+      "get": {
+        "operationId": "/redirect-to",
+        "description": "302 redirects to a URL provided in query",
+        "parameters": [{
+          "name": "url",
+          "in": "query",
+          "description": "Redirect target",
+          "required": true,
+          "type": "string",
+          "default": "http://example.com"
+        }],
+        "responses": {}
+      }
+    },
+    "/stream/{number}": {
+      "get": {
+        "operationId": "/stream",
+        "description": "Streams min(number, 100) lines.",
+        "parameters": [{
+          "name": "number",
+          "in": "path",
+          "description": "Number of lines to stream.",
+          "required": true,
+          "type": "number",
+          "default": "10"
+        }],
+        "responses": {}
       }
     }
   }
