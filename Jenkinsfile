@@ -17,7 +17,7 @@ node() {
         openapi: [filename: "specs/swagger.json"],
         environment: [ baseSystemName: "api",
                        privateBaseUrl: params.PRIVATE_BASE_URL,
-                       privateBasePath: "/api",
+                       privateBasePath: "/",
                        publicStagingWildcardDomain: params.PUBLIC_STAGING_WILDCARD_DOMAIN,
                        publicProductionWildcardDomain: params.PUBLIC_PRODUCTION_WILDCARD_DOMAIN ],
         toolbox: [ openshiftProject: params.NAMESPACE,
