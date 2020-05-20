@@ -8,10 +8,7 @@ library identifier: '3scale-toolbox-jenkins@master',
 def service = null
 
 node() {
-  stage('Checkout Source') {
-    checkout scm
-  }
-
+  
   stage("Prepare") {
     service = toolbox.prepareThreescaleService(
         openapi: [filename: "specs/swagger.json"],
