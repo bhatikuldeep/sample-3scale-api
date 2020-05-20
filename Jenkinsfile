@@ -73,8 +73,8 @@ node() {
     sh """
     echo "Public Staging Base URL is ${publicStagingBaseURL}"
     echo "userkey is ${testUserKey}"
-    curl -vfk ${publicStagingBaseURL}/ip?user_key=${testUserKey}'
-    curl -vfk ${publicStagingBaseURL}/json?user_key=${testUserKey}'
+    curl -vfk ${publicStagingBaseURL}'/ip?user_key='${testUserKey}
+    curl -vfk ${publicStagingBaseURL}'/json?user_key='${testUserKey}
     """
   }
   
