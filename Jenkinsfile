@@ -73,9 +73,8 @@ node() {
     sh """
     echo "Public Staging Base URL is ${publicStagingBaseURL}"
     echo "userkey is ${testUserKey}"
-    curl -vfk ${publicStagingBaseURL}/beer -H 'api-key: ${testUserKey}'
-    curl -vfk ${publicStagingBaseURL}/beer/Weissbier -H 'api-key: ${testUserKey}'
-    curl -vfk ${publicStagingBaseURL}/beer/findByStatus/available -H 'api-key: ${testUserKey}'
+    curl -vfk ${publicStagingBaseURL}/ip -H 'api-key: ${testUserKey}'
+    curl -vfk ${publicStagingBaseURL}/json -H 'api-key: ${testUserKey}'
     """
   }
   
