@@ -30,6 +30,14 @@ def publicProductionBaseURL = null // change to something such as "http://my-pro
 
 node() {
 
+    stage("Fetch OpenAPI") {
+    // Fetch the OpenAPI Specification file and provision it as a ConfigMap
+    sh """
+    oc delete configmap openapi --ignore-not-found
+    oc create configmap openapi --from-file="openapi-spec.json"
+    """
+  }
+
   stage("Import OpenAPI") {
     def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "specs/openapi-spec.json", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
     if (publicStagingBaseURL != null) {
