@@ -16,11 +16,11 @@
  * 4. Create a new Jenkins pipeline using the content of this file.
  */
 
-def targetSystemName = "hybrid_usecase_open_0"
+def targetSystemName = "sample-jenkins-api"
 def targetInstance = "3scale-saas"
 def privateBaseURL = "http://echo-api.3scale.net"
 def testUserKey = "azerty1234567890"
-def developerAccountId = "john"
+def developerAccountId = "3"
 
 /*
  * Only needed when using self-managed APIcast or on-premises installation of 3scale
