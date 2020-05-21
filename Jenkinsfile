@@ -30,14 +30,12 @@ def publicProductionBaseURL = "https://sample-jenkins-api-3scale-apicast-product
 
 node() {
 
-    stage('Checkout Source') {
-    checkout scm
-  }
     stage("Fetch OpenAPI") {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
+    curl -sfk -o swagger.json https://raw.githubusercontent.com/bhatikuldeep/sample-3scale-api/master/specs/swagger.json
     oc delete configmap openapi --ignore-not-found
-    oc create configmap openapi --from-file="/specs/swagger.json"
+    oc create configmap openapi --from-file="swagger.json"
     """
   }
 
