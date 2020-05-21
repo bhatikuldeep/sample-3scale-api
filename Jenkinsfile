@@ -17,7 +17,6 @@ node() {
         openapi: [filename: "specs/swagger.json"],
         environment: [ baseSystemName: "hybrid_usecase_open",
                        targetSystemName: "api",
-                       privateBaseUrl: params.PRIVATE_BASE_URL,
                        privateBasePath: "/ip",
                        publicStagingWildcardDomain: params.PUBLIC_STAGING_WILDCARD_DOMAIN,
                        publicProductionWildcardDomain: params.PUBLIC_PRODUCTION_WILDCARD_DOMAIN ],
