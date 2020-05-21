@@ -9,7 +9,8 @@ def service = null
 
 node() {
   stage('Checkout Source') {
-    checkout scm
+      echo "hello-world"
+    //checkout scm
   }
 
   stage("Prepare") {
