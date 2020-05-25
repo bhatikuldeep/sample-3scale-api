@@ -20,7 +20,8 @@ node() {
         toolbox: [ openshiftProject: params.NAMESPACE,
                    destination: params.TARGET_INSTANCE,
                    image: "quay.io/redhat/3scale-toolbox:master", // TODO: remove me once the final image is released
-                   secretName: params.SECRET_NAME],
+                   secretName: params.SECRET_NAME,
+                   verbose: true],
         service: [:],
         applications: [
             [ name: "my-test-app", description: "This is used for tests", plan: "test", account: params.DEVELOPER_ACCOUNT_ID ]
