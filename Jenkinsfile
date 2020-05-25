@@ -20,7 +20,7 @@ def targetSystemName = "api"
 def targetInstance = "3scale-saas"
 def privateBaseURL = "https://mocktarget.apigee.net"
 def testUserKey = "azerty1234567890"
-def developerAccountId = "32445582796064"
+def developerAccountId = "2445582796064"
 
 /*
  * Only needed when using self-managed APIcast or on-premises installation of 3scale
