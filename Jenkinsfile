@@ -18,7 +18,7 @@
 
 def targetSystemName = "api"
 def targetInstance = "3scale-saas"
-def privateBaseURL = "http://echo-api.3scale.net"
+def privateBaseURL = "https://mocktarget.apigee.net"
 def testUserKey = "azerty1234567890"
 def developerAccountId = "3"
 
@@ -73,8 +73,8 @@ node() {
     sh """
     echo "Public Staging Base URL is ${publicStagingBaseURL}"
     echo "userkey is ${testUserKey}"
-    curl -vfk ${publicStagingBaseURL}'/ip?user_key='${testUserKey}
-    curl -vfk ${publicStagingBaseURL}'/json?user_key='${testUserKey}
+    curl -vfk ${publicStagingBaseURL}/ip -H 'api-key: ${testUserKey}'
+    curl -vfk ${publicStagingBaseURL}/json -H 'api-key: ${testUserKey}'
     """
   }
   
