@@ -20,13 +20,13 @@ def targetSystemName = "api"
 def targetInstance = "3scale-saas"
 def privateBaseURL = "https://mocktarget.apigee.net"
 def testUserKey = "azerty1234567890"
-def developerAccountId = "2445582796064"
+def developerAccountId = params.DEVELOPER_ACCOUNT_ID
 
 /*
  * Only needed when using self-managed APIcast or on-premises installation of 3scale
  */
-def publicStagingBaseURL = "http://apicast-3scalegateway.192.168.64.12.nip.io:80" // change to something such as "http://my-staging-api.example.test" for self-managed APIcast or on-premises installation of 3scale
-def publicProductionBaseURL = "http://apicast-3scalegateway.192.168.64.12.nip.io:80" // change to something such as "http://my-production-api.example.test" for self-managed APIcast or on-premises installation of 3scale
+def publicStagingBaseURL = "http://apicast-staging-api-lifecycle.192.168.64.12.nip.io" // change to something such as "http://my-staging-api.example.test" for self-managed APIcast or on-premises installation of 3scale
+def publicProductionBaseURL = "http://apicast-production-api-lifecycle.192.168.64.12.nip.io" // change to something such as "http://my-production-api.example.test" for self-managed APIcast or on-premises installation of 3scale
 
 node() {
 
@@ -80,10 +80,6 @@ node() {
   
   stage("Promote to production") {
     runToolbox([ "3scale", "proxy", "promote", targetInstance, targetSystemName ])
-  }
-
-  stage("Publish ActiveDocs") {
-    runToolbox([ "3scale", "activedocs", "apply", targetInstance, , "-p" ])
   }
 }
 
