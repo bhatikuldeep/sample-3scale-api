@@ -135,7 +135,7 @@ def runToolbox(args) {
               ],
               "volumeMounts": [
                  [ "mountPath": "/config", "name": "toolbox-config" ],
-                 [ "mountPath": "/specs", "name": "specs" ]  
+                 [ "mountPath": "/specs", "name": "specs" ],  
                  [ "mountPath": "/apiconfig", "name": "apiconfig" ]  
               ]
             ]
