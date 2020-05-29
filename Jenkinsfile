@@ -37,15 +37,15 @@ node() {
   stage("Fetch OpenAPI") {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
-    oc delete configmap apirootfolder --ignore-not-found
-    oc create configmap apirootfolder --from-file="""$(pwd)"""
+    oc delete configmap openapi --ignore-not-found
+    oc create configmap openapi --from-file="specs/loyalty-customer-experience-api.yml"
     """
   }
 
   stage("Import OpenAPI") {
     //def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "/specs/loyalty-customer-experience-api.yml", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
     //3scale import openapi -d 3scale-saas -t api --override-private-base-url=http://loyalty-customer-experience-api:8080 --default-credentials-userkey=user_key --override-public-basepath=/consumer loyalty-customer-experience-api.yml 
-    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "-t", "api", "--override-private-base-url=${privateBaseURL}", "--default-credentials-userkey=${testUserKey}", "--override-public-basepath=/consumer", "/apirootfolder/specs/loyalty-customer-experience-api.yml"]
+    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "-t", "api", "--override-private-base-url=${privateBaseURL}", "--default-credentials-userkey=${testUserKey}", "--override-public-basepath=/consumer", "/specs/loyalty-customer-experience-api.yml"]
     if (publicStagingBaseURL != null) {
         tooboxArgs += "--staging-public-base-url=${publicStagingBaseURL}"
     }
@@ -54,10 +54,18 @@ node() {
     }
     runToolbox(tooboxArgs)
   }
+
+  stage("Fetch Application Plan") {
+    // Fetch the OpenAPI Specification file and provision it as a ConfigMap
+    sh """
+    oc delete configmap applicationplan --ignore-not-found
+    oc create configmap applicationplan --from-file="config/application-plan.yaml"
+    """
+  }
   
   stage("Create an Application Plan") {
     //runToolbox([ "3scale", "application-plan", "apply", targetInstance, targetSystemName, "test", "-n", "Test Plan", "--default" ])
-    runToolbox([ "3scale", "application-plan", "import", targetInstance, targetSystemName, "--file=/apirootfolder/config/application-plan.yaml"])
+    runToolbox([ "3scale", "application-plan", "import", targetInstance, targetSystemName, "--file=/apiconfig/application-plan.yaml"])
     //3scale application-plan import icemobile-dev api --file=config/application-plan.yaml
   }
 
@@ -127,7 +135,8 @@ def runToolbox(args) {
               ],
               "volumeMounts": [
                  [ "mountPath": "/config", "name": "toolbox-config" ],
-                 [ "mountPath": "/apirootfolder", "name": "apirootfolder" ]  
+                 [ "mountPath": "/specs", "name": "specs" ]  
+                 [ "mountPath": "/apiconfig", "name": "apiconfig" ]  
               ]
             ]
           ],
@@ -135,7 +144,8 @@ def runToolbox(args) {
             // This Secret contains the .3scalerc.yaml toolbox configuration file
             [ "name": "toolbox-config", "secret": [ "secretName": "3scale-toolbox" ] ],
             // This ConfigMap contains the artifacts to deploy (OpenAPI Specification file, Application Plan file, etc.)
-            [ "name": "apirootfolder", "configMap": [ "name": "apirootfolder" ] ]            
+            [ "name": "specs", "configMap": [ "name": "openapi" ] ],           
+            [ "name": "apiconfig", "configMap": [ "name": "apiconfig" ] ]            
           ]
         ]
       ]
