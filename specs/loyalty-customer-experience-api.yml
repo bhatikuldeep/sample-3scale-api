@@ -1,0 +1,2526 @@
+openapi: 3.0.0
+info:
+  version: 1.26.4
+  title: Consumer API
+  description: >-
+    You can use this API to retrieve loyalty program and shopper information to
+    display in a loyalty program app.
+servers:
+  - url: http://localhost:9090
+    description: Local development
+
+paths:
+  /v0/health/readiness:
+    get:
+      deprecated: true
+      operationId: getReadiness
+      summary: Checks whether the service is ready
+      tags:
+        - Health
+      parameters:
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        200:
+          description: Service readiness information.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadinessResponse'
+        500:
+          description: Generic error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+
+  /v0/health/liveness:
+    get:
+      operationId: getLiveness
+      summary: Checks whether the service is live
+      tags:
+        - Health
+      parameters:
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        200:
+          description: Host and process health information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivenessResponse'
+        500:
+          description: Generic error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+
+  /metrics:
+    get:
+      operationId: getMetrics
+      summary: Retrieve the metrics of the service
+      tags:
+        - Metrics
+      parameters:
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        200:
+          description: Metrics of the service.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /swagger.yaml:
+    get:
+      operationId: getSwagger
+      summary: Retrieve the Swagger specifications of this service
+      tags:
+        - Swagger
+      parameters:
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        200:
+          description: Swagger specifications of this service.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /v1/programs/{programId}/analytics:
+    post:
+      operationId: V1postAnalytics
+      summary: Post a message to the platform for insights.
+      tags:
+        - Analytics
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/V1AnalyticsLoginRequest'
+                - $ref: '#/components/schemas/V1AnalyticsDeviceRegistrationRequest'
+              discriminator:
+                propertyName: type
+                mapping:
+                  LOGIN: '#/components/schemas/V1AnalyticsLoginRequest'
+                  DEVICE_REGISTRATION: '#/components/schemas/V1AnalyticsDeviceRegistrationRequest'
+      responses:
+        '204':
+          description: Analytics message received successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/participations/{mediumId}:
+    get:
+      operationId: getParticipation
+      summary: Gets a shopper participation.
+      description: Gets a loyalty identity for a single shopper in the specified loyalty program based on that shoppers' loyalty medium.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/mediumId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Shopper created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/MediumNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/participations:
+    post:
+      operationId: postParticipation
+      summary: Participate a shopper.
+      description: Create a loyalty identity for a single shopper in the specified loyalty program based on that shoppers' loyalty medium.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participation'
+      responses:
+        '200':
+          description: Shopper created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/participations:
+    post:
+      operationId: V1postParticipationByMediumCode
+      summary: Participate a shopper.
+      description: Create a loyalty identity for a single shopper in the specified loyalty program based on that shoppers' medium Code.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipationByMediumCode'
+      responses:
+        '200':
+          description: Shopper existing and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipateResponseByMediumCode'
+        '201':
+          description: Shopper created successfully and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipateResponseByMediumCode'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/identities/{loyaltyId}:
+    get:
+      operationId: V1getIdentityByLoyaltyId
+      summary: Get identity.
+      description: Return the identity information of a collecting shopper.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/loyaltyId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Data retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1Identity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/identities/{loyaltyId}/rewards:
+    get:
+      operationId: V1getRewardsByLoyaltyId
+      summary: Get rewards redeemed by collecting shopper.
+      description: Return the rewards redeemed by a collecting shopper.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/loyaltyId'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Rewards retrieved successfully.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/V1RedeemedRewardListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/mediums/{mediumId}/transactions:
+    get:
+      deprecated: true
+      operationId: getTransactions
+      summary: Get transaction history.
+      description: Return the transaction history of a collecting shopper.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/mediumId'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Transactions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/MediumNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/identities/{loyaltyId}/transactions:
+    get:
+      operationId: V1getTransactionsByLoyaltyId
+      summary: Get transaction history.
+      description: Return the transaction history of a collecting shopper. The list is sorted on createdOnDate.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/loyaltyId'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/transactionType'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Transactions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/V1TransactionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/mediums/{mediumId}/transactions:
+    get:
+      operationId: V1getTransactionsByMediumId
+      summary: Get transaction history.
+      description: Return the transaction history of a collecting shopper.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/mediumId'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Transactions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/V1TransactionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/mediums/{mediumId}/balance:
+    get:
+      operationId: getBalance
+      deprecated: true
+      summary: Get balance.
+      description: >-
+        Return the current balance and redeemable balance of a collecting
+        shopper. The balance is the total number of points a shopper has
+        collected. The redeemable balance is the number of points that may be
+        used to redeem rewards.
+      tags:
+        - Shopper Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/mediumId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Balance retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/MediumNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}:
+    get:
+      deprecated: true
+      operationId: getProgram
+      summary: Get loyalty program information.
+      description: 'Return the loyalty program description, definition, start and end dates.'
+      tags:
+        - Program Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Loyalty program information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramInformationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}:
+    get:
+      operationId: V1getProgramById
+      summary: Get program information.
+      description: 'Return the program information, description, definition, start and end dates.'
+      tags:
+        - Program Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Loyalty program information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1ProgramInformationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/content/{file}:
+    get:
+      operationId: "getLenientContent"
+      summary: "Download a file."
+      description: "Download a file that is used for a specific loyalty program."
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/file'
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: "File downloaded."
+          content:
+            application/json:
+              schema:
+                type: 'object'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: "#/components/responses/FileNotFoundError"
+
+  /v0/programs/{programId}/rewards:
+    get:
+      deprecated: true
+      operationId: getRewards
+      summary: Get rewards.
+      description: >-
+        Return the list of rewards within a loyalty program, ordered by the
+        order field, ascending.
+      tags:
+        - Program Information
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Rewards retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RewardItemReponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/rewards:
+    get:
+      operationId: V1getRewards
+      summary: Get rewards.
+      description: >-
+        Return the list of rewards within a loyalty program.
+      tags:
+        - Rewards
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/platform'
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - ACTIVE
+              - INACTIVE
+          description: Filter rewards on status.
+      responses:
+        '200':
+          description: Rewards retrieved successfully.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/V1RewardListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/rewards/{rewardId}:
+    get:
+      operationId: V1getRewardById
+      summary: Get a single reward by ID.
+      description: >-
+        Return a reward by ID within a loyalty program.
+      tags:
+        - Rewards
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/rewardId'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Reward retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1RewardItemReponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/identities/{loyaltyId}/gifts:
+    post:
+      operationId: V1postGifts
+      summary: Creates a gift by a loyalty Id.
+      description: Creates a gift of a certain number of points by a loyalty Id.
+      tags:
+        - Gifting
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/loyaltyId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V1CreateGift'
+      responses:
+        '200':
+          description: Gift created and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1GiftResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: V1putGifts
+      summary: Redeems a gift.
+      description: Redeems a gift using the gift code.
+      tags:
+        - Gifting
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/loyaltyId'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/V1RedeemGift'
+      responses:
+        '200':
+          description: Gift redeemed and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1GiftRedeemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/identities/{loyaltyIdentity}/personalpromotions:
+    get:
+      operationId: getPersonalPromotions
+      summary: Get personal promotions.
+      description: >-
+        Return all personal promotions, both generic and opt-in, that are available for a specific shopper within
+        a loyalty program. A personal promotion is a type of promotion that yields extra points for a shopper based on
+        a certain action of that shopper.
+      tags:
+        - Promotions
+      parameters:
+        - $ref: '#/components/parameters/loyaltyIdentity'
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Promotions retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PromotionItemReponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/identities/{loyaltyIdentity}/personalpromotions/{promotionCode}/accept:
+    post:
+      operationId: postAcceptPersonalPromotion
+      summary: Accept personal promotion
+      description: >-
+        Accept a personal promotion for a shopper.
+      tags:
+        - Promotions
+      parameters:
+        - $ref: '#/components/parameters/loyaltyIdentity'
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/promotionCode'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '204':
+          description: Successfully accepted personal promotion.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      requestBody:
+        description: THIS SHOULD NOT BE INCLUDED IN THE REQUEST!!! (this is here to fix an issue with android automatically adding a content-type header when doing a post request)
+        content:
+          application/json:
+            schema:
+              type: string
+
+  /v0/programs/{programId}/identities/{loyaltyIdentity}/personalpromotions/mostrecenttransaction:
+    get:
+      operationId: getMostRecentAchievedPersonalPromotionTransaction
+      summary: Get most recent transaction with personal promotion.
+      description: >-
+        Return the most recent transaction that yielded personal promotion points for a shopper in a specific loyalty program.
+      tags:
+        - Promotions
+      parameters:
+        - $ref: '#/components/parameters/loyaltyIdentity'
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguageOptional'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Transaction with the achieved personal promotions in the metadata field.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionRequest'
+        '204':
+          description: No transaction found which achieved a personal promotion.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/promotions:
+    get:
+      operationId: V1getPromotions
+      summary: Retrieve promotions
+      description: Return the currently active promotions.
+      tags:
+        - Promotions
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/promotiontype'
+        - $ref: '#/components/parameters/channelIds'
+        - $ref: '#/components/parameters/segments'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: All active promotions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1PromotionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/promotionperiods:
+    get:
+      operationId: V1getPromotionPeriods
+      summary: Retrieve promotion period which contain linked Bonus Point Offer groups or Bonus Point Offer lists.
+      description: Return the currently active promotion periods. When groups are disabled (hidden = true) they are not returned, and instead the linked Bonus Point Offers are returned.
+      tags:
+        - Bonus Point Offers
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/bpoChannelIds'
+        - $ref: '#/components/parameters/liveDate'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: All promotion periods with Bonus Point Offer groups or Bonus Point Offers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1PromotionPeriodList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/programs/{programId}/promotionperiods/{promotionPeriodId}/groups/{groupId}:
+    get:
+      operationId: V1getPromotionGroupByPromotionPeriodIdAndGroupId
+      summary: Retrieve all Bonus Point Offers in a Bonus Point Offer group of a specific Promotion Period.
+      description: Return all Bonus Point Offers inside a Bonus Point Offers group of a specific Promotion Period.
+      tags:
+        - Bonus Point Offers
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/promotionPeriodId'
+        - $ref: '#/components/parameters/bpoGroupId'
+        - $ref: '#/components/parameters/bpoChannelIds'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: All Bonus Point Offers in the requested Bonus Point Offer group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1BonusPointOfferList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/programs/{programId}/promotions/{promotionId}:
+    get:
+      operationId: V1getPromotionById
+      summary: Retrieve a single Bonus Point Offer.
+      description: Return a single Bonus Point Offer with a specific identifier.
+      tags:
+        - Bonus Point Offers
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/promotionId'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: The Bonus Point Offers matching the ID provided in the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V1BonusPointOffer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/promotions/bonuspointoffers/actionperiods:
+    get:
+      deprecated: true
+      operationId: getCurrentActionPeriodsBonusPointOfferAndGroups
+      summary: Retrieve action periods and linked Bonus Point Offer groups.
+      description: Return the currently active action period and the Bonus Point Offer groups linked to this action period. When groups are disabled (hidden = true) they are not returned, and instead the linked Bonus Point Offers are returned. The response is returned in the Bright Stamps front end by the /my/stamps call.
+      tags:
+        - Bonus Point Offers UX
+      parameters:
+        - name: tenant
+          description: Unique name of the tenant, usually the name of the retailer.
+          schema:
+            type: string
+          required: true
+          in: header
+        - name: Accept-Language
+          description: The Accept-Language request HTTP header advertises which languages the client is able to understand, and which locale variant is preferred.
+          schema:
+            type: string
+          required: true
+          in: header
+        - name: programId
+          description: The unique ID of the program.
+          schema:
+            type: string
+          required: true
+          in: path
+        - name: channelIds
+          description: The channel ids (comma separated) to which the Bonus Point Offers must belong.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9-_,]{1,100}$'
+          required: false
+          in: query
+        - name: liveDateTime
+          description: The datetime at which the action period should be active, if not provided, the current datetime is used.
+          required: false
+          schema:
+            type: string
+          in: query
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: All action periods with Bonus Point Offer groups or Bonus Point Offers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentActionPeriodBonusPointOffer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/promotions/bonuspointoffers/groups/{groupId}:
+    get:
+      deprecated: true
+      operationId: getAllBonusPointOffersInBonusPointOfferGroup
+      summary: Retrieve all Bonus Point Offers in a Bonus Point Offer group.
+      description: Return all Bonus Point Offers inside a Bonus Point Offers group. Used by the Bright Stamps front end.
+      tags:
+        - Bonus Point Offers UX
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/bpoGroupId'
+        - $ref: '#/components/parameters/bpoChannelIds'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: All Bonus Point Offers in the requested Bonus Point Offer group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusPointGroup'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v0/programs/{programId}/promotions/bonuspointoffers/{promotionId}:
+    get:
+      deprecated: true
+      operationId: getSingleBonusPointOffersAssociatedToProgram
+      summary: Retrieve a single Bonus Point Offer associated to a program.
+      description: Return a single Bonus Point Offer associated to a program. Used by the Bright Stamps front end.
+      tags:
+        - Bonus Point Offers UX
+      parameters:
+        - $ref: '#/components/parameters/tenant'
+        - $ref: '#/components/parameters/acceptLanguage'
+        - $ref: '#/components/parameters/programId'
+        - $ref: '#/components/parameters/promotionId'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: The Bonus Point Offers matching the ID provided in the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusPointOffer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/EndOfCampaignError'
+        '405':
+          $ref: '#/components/responses/MethodNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    loyaltyId:
+      name: loyaltyId
+      description: The unique loyalty ID of the shopper.
+      in: path
+      required: true
+      schema:
+        type: string
+    loyaltyIdentity:
+      name: loyaltyIdentity
+      description: The unique loyalty ID of the shopper.
+      in: path
+      required: true
+      schema:
+        type: string
+    tenant:
+      name: tenant
+      description: Unique name of the tenant, usually the name of the retailer.
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    programId:
+      name: programId
+      description: The unique ID of the program.
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    mediumId:
+      name: mediumId
+      description: The unique ID of the medium.
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    promotionCode:
+      name: promotionCode
+      description: The promotion code.
+      in: path
+      required: true
+      schema:
+        type: string
+    offset:
+      name: offset
+      description: >-
+        The offset of the items to get. For example, if you set the offset to
+        10, you will skip the first 10 items in the response.
+      in: query
+      required: false
+      schema:
+        type: string
+    limit:
+      name: limit
+      description: The maximum number of items returned.
+      in: query
+      required: false
+      schema:
+        type: string
+    participation:
+      name: participation
+      in: query
+      description: The details required to participate the shopper
+      required: true
+      schema:
+        $ref: '#/components/schemas/Participation'
+    acceptLanguage:
+      name: Accept-Language
+      description: >-
+        The Accept-Language request HTTP header advertises which languages the
+        client is able to understand, and which locale variant is preferred.
+        If provided, only localized strings for the provided language are
+        returned. If not provided or provided language is not available, the
+        localized strings for all available languages will be returned.
+      schema:
+        type: string
+      required: true
+      in: header
+    acceptLanguageOptional:
+      name: Accept-Language
+      description: >-
+        The Accept-Language request HTTP header advertises which languages the
+        client is able to understand, and which locale variant is preferred.
+        If provided, only localized strings for the provided language are
+        returned. If not provided or provided language is not available, the
+        localized strings for all available languages will be returned.
+      schema:
+        type: string
+      in: header
+    platform:
+      name: x-platform
+      description: >-
+        The platform that requests the file (can be android or ios or web)
+      schema:
+        type: string
+      in: header
+    promotiontype:
+      name: filterTypes
+      description: Filter the response based on a single promotion type, or list of types. values can consist of ACTIVATION_BONUS, COLLECT_MULTIPLIER, REDEEM_BONUS,  BASKET_CALCULATION_PURCHASED_VALUE, BASKET_CALCULATION_CHECKOUT, BASKET_CALCULATION_BONUS_PRODUCTS
+      in: query
+      required: false
+      schema:
+        type: string
+    channelIds:
+      name: channels
+      description: The channel ids (comma seperated) to which the Bonus Point Offers must belong.
+      required: false
+      in: query
+      schema:
+        type: string
+    segments:
+      name: segments
+      description: Filter by shopper segment.
+      required: false
+      in: query
+      schema:
+        type: string
+    orderDirection:
+      name: orderDirection
+      description: 'The order in which to display rewards, ascending or descending.'
+      in: query
+      required: false
+      schema:
+        type: string
+        description: >-
+          Specify direction in which direction the rewards are ordered. ('asc'
+          for ascending, 'desc' for descending)
+    liveDate:
+      name: liveDate
+      description: Return only items active at this date (use ISO8601 format). If not provided, the current date is used.
+      in: query
+      required: false
+      schema:
+        type: string
+    status:
+      name: status
+      description: The status of the reward.
+      in: query
+      required: false
+      schema:
+        type: string
+        description: 'The status that the reward has, can be active or inactive.'
+    transactionType:
+      name: type
+      description: Specify the transaction type.
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - activation-bonus
+          - add
+          - cancel-collect
+          - cancel-redeem-bonus
+          - collect
+          - convert
+          - deduct
+          - gift-cancelled
+          - gift-created
+          - gift-expired
+          - gift-redeemed
+          - join-group
+          - redeem
+          - redeem-bonus
+          - referral-bonus
+          - refund
+          - return
+          - transfer
+    file:
+      name: file
+      description: >-
+        The file key as it is known by the application you are retrieving the file from.
+        For example, use termsAndConditions to retrieve the file termsAndConditions_android.fr_ca.json.
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    promotionPeriodId:
+      name: promotionPeriodId
+      description: The ID of the promotion period.
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    bpoGroupId:
+      name: groupId
+      description: The ID of the Bonus Point Offer group.
+      required: true
+      in: path
+      schema:
+        type: string
+
+    bpoChannelIds:
+      name: channelIds
+      description: The channel ids (comma seperated) to which the Bonus Point Offers must belong.
+      required: false
+      in: query
+      schema:
+        type: string
+
+    promotionId:
+      name: promotionId
+      description: The ID of the Bonus Point Offer.
+      required: true
+      in: path
+      schema:
+        type: string
+
+    liveDateTime:
+      name: liveDateTime
+      description: Return only the active promotions at this date and time (ISO 8601)
+      required: false
+      in: query
+      schema:
+        type: string
+    rewardId:
+      name: rewardId
+      description: The unique ID of the reward.
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'
+    MethodNotFound:
+      description: Method not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MethodNotFoundError'
+    UnsupportedMediaType:
+      description: Unsupported Media Type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsupportedMediaTypeError'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericError'
+    MediumNotFound:
+      description: Medium not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MediumNotFoundError'
+    FileNotFoundError:
+      description: File not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileNotFoundError'
+    EndOfCampaignError:
+      description: Campaign has ended
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EndOfCampaignError'
+
+  schemas:
+    V1AnalyticsRequest:
+      type: object
+      required: [deviceId, platform, platformVersion, appVersion, appLanguage]
+      properties:
+        deviceId:
+          type: string
+          example: '77e9fef8-5b4d-4fb2-958e-b3a45d6b20a1'
+          description: A unique identifier of the device which sends the request.
+        platform:
+          type: string
+          example: 'Android'
+          description: The platform of the origin of the request.
+        platformVersion:
+          type: string
+          example: '1.0'
+          description: The version of the platform.
+          format: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[a-zA-Z\d][-a-zA-Z.\d]*)?(\+[a-zA-Z\d][-a-zA-Z.\d]*)?$
+        appVersion:
+          type: string
+          example: '12.1.30'
+          description: The version of the application.
+          format: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[a-zA-Z\d][-a-zA-Z.\d]*)?(\+[a-zA-Z\d][-a-zA-Z.\d]*)?$
+        appLanguage:
+          type: string
+          example: 'en-us'
+          description: >-
+            A IETF language tag of the application. Format not
+            fully defined, more info at
+            (https://en.wikipedia.org/wiki/IETF_language_tag).
+    V1AnalyticsDeviceRegistrationRequest:
+      allOf:
+        - $ref: '#/components/schemas/V1AnalyticsRequest'
+        - type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum:
+                - DEVICE_REGISTRATION
+              description: The type of analytics event send.
+    V1AnalyticsLoginRequest:
+      allOf:
+        - $ref: '#/components/schemas/V1AnalyticsRequest'
+        - type: object
+          required: [type, loyaltyId]
+          properties:
+            type:
+              type: string
+              enum:
+                - LOGIN
+              description: The type of analytics event send.
+            loyaltyId:
+              type: string
+              example: '8d9fb354-52c4-47b1-8c24-6577c7702c4d'
+              description: The loyaltyId of the participating user who just logged in.
+
+    V1CreateGift:
+      type: object
+      required:
+          - points
+      properties:
+        points:
+            type: number
+            description: Number of points that will be included in the gift.
+
+    V1RedeemGift:
+      type: object
+      required:
+          - code
+      properties:
+        code:
+            type: string
+            description: Gift code.
+
+    ParticipationByMediumCode:
+      type: object
+      required: [ mediumCode ]
+      properties:
+        mediumCode:
+          type: string
+          example: 123456
+          description: The medium code of the shopper.
+        accountCode:
+          type: string
+          example: 1234567
+          description: This is used to link a "membership" to the medium code.
+        marketingId:
+          type: string
+          description: The marketing Id linked to the shopper's account.
+
+    Participation:
+      type: object
+      properties:
+        mediumId:
+          type: string
+          example: ffd80d6d-a30c-442e-8a20-f704f5491eb5
+          description: The loyalty medium identifier of the shopper.
+        marketingId:
+          type: string
+          example: ec2c5f25-92d1-41cc-80c4-c5f03374db21
+          description: Optional. This is used to identify the shopper in the push message provider.
+
+    ParticipateResponseByMediumCode:
+      type: object
+      required: [loyaltyId, accountId, mediumId, marketingId, mediumType]
+      properties:
+        loyaltyId:
+          type: string
+          example: 04bec942-92c6-4dbf-87ab-311e6549262f
+        accountId:
+          type: string
+          example: d488feeb-21bd-4092-8bea-23972efa9504
+        mediumId:
+          type: string
+          example: a1c3bb42-5bcf-4695-a0ac-3869de14ac79
+        marketingId:
+          type: string
+          example: 4bf4b634-d5f5-41cd-bc2f-6d88312629e1
+        mediumType:
+          type: string
+          example: physical
+
+    ParticipateResponse:
+      type: object
+      properties:
+        loyaltyIdentity:
+          type: string
+          example: 04bec942-92c6-4dbf-87ab-311e6549262f
+        accountId:
+          type: string
+          example: d488feeb-21bd-4092-8bea-23972efa9504
+        mediumId:
+          type: string
+          example: a1c3bb42-5bcf-4695-a0ac-3869de14ac79
+        marketingId:
+          type: string
+          example: 4bf4b634-d5f5-41cd-bc2f-6d88312629e1
+
+    TransactionRequest:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: 57562906-04ec-4c9e-88f6-864cecf42927
+        createdOn:
+          type: string
+        mediumId:
+          type: string
+          example: ffd80d6d-a30c-442e-8a20-f704f5491eb5
+        loyaltyId:
+          type: string
+          example: aec986fc-1984-4a94-9813-e0e739062d51
+        mutation:
+          type: integer
+          example: 1
+        metadata:
+          type: object
+          example:
+            additionalProp1: additionalValue1
+            additionalProp2: additionalValue2
+        source:
+          type: object
+          example:
+            posId: posId
+            cashierId: cashierId
+            storeId: storeId
+        type:
+          type: string
+          enum:
+            - collect
+            - redeem
+            - add
+            - deduct
+            - convert
+            - transfer
+            - activation-bonus
+            - gift-created
+            - gift-redeemed
+            - gift-expired
+            - gift-cancelled
+            - return
+            - redeem-bonus
+            - cancel-redeem-bonus
+
+    TransactionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/TransactionRequest'
+        - type: object
+          properties:
+            program:
+              type: string
+              example: FX8248
+            requestedMutation:
+              type: integer
+              example: 1
+
+    V1TransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 57562906-04ec-4c9e-88f6-864cecf42927
+        createdOnDate:
+          type: string
+        mediumId:
+          type: string
+          example: ffd80d6d-a30c-442e-8a20-f704f5491eb5
+        loyaltyId:
+          type: string
+          example: aec986fc-1984-4a94-9813-e0e739062d51
+        mutation:
+          type: integer
+          example: 1
+        relatedPromotionIds:
+          type: array
+          items:
+            type: string
+            example: f1e79bbd-11aa-4d4b-8a2e-d457a991fc270d
+            description: A transaction of type 'redeem-bonus' triggered by an promotion will have the identifier of the promotion present in this value.
+        relatedRewardIds:
+          type: array
+          items:
+            type: string
+            example: 296b05a4-f71c-427b-9174-0ab5268379d8
+            description: A transaction of type 'redeem' contains the rewardId's in this array.
+        type:
+          type: string
+          enum:
+            - activation-bonus
+            - add
+            - cancel-collect
+            - cancel-redeem-bonus
+            - collect
+            - convert
+            - deduct
+            - join-group
+            - gift-cancelled
+            - gift-created
+            - gift-expired
+            - gift-redeemed
+            - redeem
+            - redeem-bonus
+            - refund
+            - return
+            - transfer
+      required: [id, createdOnDate, mediumId, loyaltyId, type]
+
+    V1TransactionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/V1TransactionResponse'
+
+    BalanceResponse:
+      deprecated: true
+      type: object
+      properties:
+        balance:
+          type: integer
+          description: >-
+            The balance contains the points that may be used to redeem rewards,
+            to give away to other shoppers as gifts and to transfer to another
+            medium. Excludes special bonus points that may only be used to
+            redeem rewards, such as activation bonus points.
+          example: 195
+        redeemableBalance:
+          type: integer
+          description: >-
+            The redeemable balance is the balance that may be used to redeem
+            rewards.
+
+    ProgramInformationResponse:
+      type: object
+      properties:
+        retailerId:
+          type: string
+        retailerName:
+          type: string
+        programId:
+          type: string
+          description: >-
+            The unique ID of the program in BrandLoyalty format (2 letters
+            followed by 2 to 4 digits).
+        programName:
+          type: string
+          description: The program name.
+        programStatus:
+          type: string
+          description: The status of the program. Defaults to 'ACTIVE'
+          enum:
+            - ACTIVE
+            - INACTIVE
+        programStartDateTime:
+          type: string
+          description: 'The start date of the program(yyyy-MM-ddTHH:mm:ss).'
+        programEndDateTime:
+          type: string
+          example: '2017-08-15T13:14:15'
+          description: 'The end date of the program(yyyy-MM-ddTHH:mm:ss).'
+        collectStartDateTime:
+          type: string
+          description: 'The start date of the collect period(yyyy-MM-ddTHH:mm:ss).'
+        collectEndDateTime:
+          type: string
+          description: 'The end date of the collect period(yyyy-MM-ddTHH:mm:ss).'
+        redeemStartDateTime:
+          type: string
+          description: 'The start date of the redeem period(yyyy-MM-ddTHH:mm:ss).'
+        redeemEndDateTime:
+          type: string
+          description: 'The end date of the redeem period (yyyy-MM-ddTHH:mm:ss).'
+        countdownCollectStartDateTime:
+          type: string
+          description: 'The countdown to the Collect Start Date (yyyy-MM-ddTHH:mm:ss).'
+        countdownCollectEndDateTime:
+          type: string
+          description: 'The countdown to the Collect End Date (yyyy-MM-ddTHH:mm:ss).'
+        countdownRedeemEndDateTime:
+          type: string
+          description: 'The countdown to the Redeem End Date (yyyy-MM-ddTHH:mm:ss).'
+
+    V1ProgramInformationResponse:
+      type: object
+      required: [id, tenant, lifecycles, features]
+      properties:
+        id:
+          type: string
+          description: >-
+            The unique program id of the program.
+            Common format is the BrandLoyalty format
+            (2 letters followed by 2 to 4 digits).
+          example: ca14
+        tenant:
+          type: string
+          description: >-
+            The name of the tenant.
+            Common format is the name of the supermarket.
+          example: iga
+        timeZone:
+          type: string
+          description: The timezone of the program.
+          example: America/Toronto
+        lifecycles:
+          type: object
+          description: >-
+            A program comes with a set of period
+            objects. These period objects indicate
+            different states of a program.
+          required: [programPeriod, collectPeriod, redeemPeriod, commercialPeriod]
+          properties:
+            programPeriod:
+              $ref: '#/components/schemas/PeriodDateResponse'
+            collectPeriod:
+              $ref: '#/components/schemas/PeriodDateResponse'
+            redeemPeriod:
+              $ref: '#/components/schemas/PeriodDateResponse'
+            commercialPeriod:
+              $ref: '#/components/schemas/PeriodDateResponse'
+        features:
+          type: object
+          required: [countdown]
+          properties:
+            gifting:
+              $ref: '#/components/schemas/GiftingAmountResponse'
+            countdown:
+              $ref: '#/components/schemas/CountdownResponse'
+
+    GiftingAmountResponse:
+      type: object
+      required: [maximumPointsPerTransfer, maximumPointsGiftablePerDay, maximumDailyRedeem, daysToExpire]
+      properties:
+        maximumPointsPerTransfer:
+          type: integer
+          description: 'The maximum amount of points that can be transfered in a single gift.'
+        maximumPointsGiftablePerDay:
+          type: integer
+          example: 30
+          description: 'The maximum amount of points that can be transfered daily using gifts.'
+        maximumDailyRedeem:
+          type: integer
+          example: 2
+          description: 'The maximum amount of gifts that can be daily redeemed.'
+        daysToExpire:
+          type: integer
+          example: 7
+          description: 'The amount of days it takes before a gift will expire.'
+
+    CountdownResponse:
+      type: object
+      required: [collectStartDate, collectEndDate, redeemEndDate]
+      properties:
+        collectStartDate:
+          type: string
+          example: '2017-08-15T13:14:15.000Z'
+          description: 'The countdown to the Collect Start Date (ISO8601 format).'
+        collectEndDate:
+          type: string
+          example: '2017-08-15T13:14:15.000Z'
+          description: 'The countdown to the Collect End Date (ISO8601 format).'
+        redeemEndDate:
+          type: string
+          example: '2017-08-15T13:14:15.000Z'
+          description: 'The countdown to the Redeem End Date (ISO8601 format).'
+
+    PromotionItemReponse:
+      type: object
+      properties:
+        promotionCode:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+          description: The relative path to the image of the promotion.
+        type:
+          type: string
+        subType:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        acceptedOn:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+            - NOT_ACCEPTED
+
+    RewardItemReponse:
+      type: object
+      properties:
+        rewardId:
+          type: string
+        rewardTitle:
+          type: string
+          description: Reward Name
+        rewardDescription:
+          type: string
+        rewardStatus:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        startDateTime:
+          type: string
+        endDateTime:
+          type: string
+        viewStartDateTime:
+          type: string
+          description: The date from which the reward may be visible in the app/frontend.
+        viewEndDateTime:
+          type: string
+          description: >-
+            The date from which the reward may no longer be visible in the
+            app/frontend.
+        order:
+          type: integer
+          description: Order in which the reward must be displayed.
+        rewardSubTitle:
+          type: string
+          description: Reward subtitle.
+        rewardSubDescription:
+          type: string
+          description: Reward description.
+        imagePath:
+          type: string
+          description: Path to the image for the promotion or Bonus Point Offer.
+        retailPrice:
+          type: number
+        amountRedeemed:
+          type: integer
+        redeemOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              redeemOptionItemId:
+                type: string
+              redeemOptionItemDiscount:
+                type: number
+              pointsCost:
+                type: integer
+              remainingPayment:
+                type: number
+
+    V1RedeemedRewardListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/V1RedeemedRewardItemResponse'
+
+    V1RedeemedRewardItemResponse:
+      allOf:
+        - $ref: '#/components/schemas/V1RewardItemReponse'
+        - type: object
+          required:
+            - amountRedeemed
+          properties:
+            amountRedeemed:
+              type: integer
+              description: The amount of times this reward was redeemed
+
+    V1RewardListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/V1RewardItemReponse'
+
+    V1RewardItemReponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Reward title.
+        subtitle:
+          type: string
+          description: Reward subtitle.
+        description:
+          type: string
+          description: Reward description.
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        imageName:
+          type: string
+          description: Name of the image for the reward.
+        retailPrice:
+          type: integer
+          description: Reward retail price.
+        redeemOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RewardRedeemOption'
+      required:
+        - id
+        - status
+
+    RewardRedeemOption:
+      type: object
+      properties:
+        id:
+          type: string
+        discount:
+          type: number
+        pointsCost:
+          type: integer
+        remainingPayment:
+          type: integer
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+      required:
+        - id
+        - pointsCost
+        - remainingPayment
+        - status
+
+    V1BonusPointOffer:
+      type: object
+      required: [id, title, points]
+      properties:
+        id:
+          type: string
+          description: Unique ID of the Bonus Point Offer
+        title:
+          type: string
+          description: Name of the Bonus Point Offer
+        description:
+          type: string
+          description: Description of the Bonus Point Offer.
+        imageId:
+          type: string
+          description: Id of the image for the Bonus Point Offer.
+        points:
+          type: integer
+          description: Amount of points that a collecting customer receives when purchasing a valid and active Bonus Point Offer.
+        price:
+          type: integer
+          description: Price of the Bonus Point Offer.
+        quantity:
+          type: string
+          description: Defines the required quantity or size to buy of a product to receive the Bonus Point Offer, for example 2 kg, 6-pack or 250 ml. The "quantity" property is used to display the quantity or size in the app.
+        channelIds:
+          type: array
+          description: Channel ids of the Bonus Point Offer.
+          items:
+            type: string
+
+    V1BonusPointOfferGroup:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: string
+          description: ID of the Bonus Point Offer group.
+        title:
+          type: string
+          description: Title of the Bonus Point Offer group.
+        description:
+          type: string
+          description: Description of the Bonus Point Offer group.
+
+    V1PromotionPeriod:
+      type: object
+      required: [id, startDate, endDate]
+      properties:
+        id:
+          type: string
+          description: ID of the promotion period.
+        title:
+          type: string
+          description: Title of the promotion period.
+        startDate:
+          type: string
+          description: Start date of promotion period (ISO8601 format).
+        endDate:
+          type: string
+          description: End date of promotion period (ISO8601 format).
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/V1BonusPointOfferGroup'
+        promotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/V1BonusPointOffer'
+
+    V1Identity:
+      type: object
+      required:
+        - loyaltyId
+        - giftableBalance
+        - totalBalance
+        - segmentIds
+      properties:
+        loyaltyId:
+          type: string
+          description: The unique loyalty ID of the shopper.
+        mediumIds:
+          type: array
+          items:
+            type: string
+        giftableBalance:
+          type: integer
+          description: The balance that may be used to redeem rewards and may be transferred to other users.
+        totalBalance:
+          type: integer
+          description: The total balance of a user, including giftable and non-giftable (such as bonus stamps) balances.
+        segmentIds:
+          type: array
+          items:
+            type: string
+          description: The segments a user is linked to
+
+    V1GiftResponse:
+      type: object
+      required:
+          - points
+          - code
+          - createdOnDate
+      properties:
+        points:
+            type: number
+            description: Number of points that will be included in the gift.
+        code:
+            type: string
+            description: Gift code that can be used to redeem the gift.
+        createdOnDate:
+            type: string
+            description: The date-time of the creation of the gift.
+
+    V1GiftRedeemResponse:
+      type: object
+      required:
+          - points
+      properties:
+        points:
+            type: number
+            description: Number of points that will be included in the gift.
+
+    V1BonusPointOfferList:
+      type: object
+      required: [promotions]
+      properties:
+        promotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/V1BonusPointOffer'
+
+    V1PromotionPeriodList:
+      type: object
+      required: [promotionPeriods]
+      properties:
+        promotionPeriods:
+          type: array
+          description: The currently active promotion periods.
+          items:
+            $ref: '#/components/schemas/V1PromotionPeriod'
+
+    V1PromotionResponse:
+      title: Promotion
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique internal ID of the promotion.
+        programId:
+          type: string
+          description: The unique ID of a program.
+        type:
+          type: string
+          description: The type of promotion.
+          example: COLLECT_MULTIPLIER
+          enum:
+            - ACTIVATION_BONUS
+            - COLLECT_MULTIPLIER
+            - REDEEM_BONUS
+            - BASKET_CALCULATION_PURCHASED_VALUE
+            - BASKET_CALCULATION_CHECKOUT
+            - BASKET_CALCULATION_BONUS_PRODUCTS
+        status:
+          type: string
+          description: Whether a promotion is currently active or not.
+          default: ACTIVE
+          enum:
+            - ACTIVE
+            - INACTIVE
+        startDate:
+          type: string
+          description: 'The start date of the promotion.(yyyy-MM-ddTHH:mm:ss).'
+        endDate:
+          type: string
+          description: 'The end date of the promotion.(yyyy-MM-ddTHH:mm:ss).'
+        subType:
+          type: string
+          description: 'Type indicating if the promotion is used as opt-in or general available. Mandatory for REDEEM_BONUS, all other promotion types only support GENERIC.'
+          enum:
+            - GENERIC
+            - OPT_IN
+            - REFERRAL_BONUS
+            - ACCEPT_REFERRAL
+            - COLLECT_BONUS
+            - PARTICIPATION_BONUS
+        imageUrl:
+          type: string
+          description: Url of the image for the promotion.
+        title:
+          title: The title for this locale.
+          type: string
+        description:
+          title: The description for this locale.
+          type: string
+        subtitle:
+          title: The subtitle for this locale.
+          type: string
+        segments:
+          type: array
+          description: segments to which the promotion belongs to
+          items:
+            type: string
+        channelIds:
+          type: array
+          description: channelIds to which the promotion belongs to
+          items:
+            type: string
+        activationBonus:
+          title: ActivationBonus
+          type: object
+          properties:
+            bonusPoints:
+              minimum: 1
+              type: integer
+              description: The amount of bonus points to award to a collecting customer for a successful activation.
+              format: int32
+        collectMultiplier:
+          title: CollectMultiplier
+          type: object
+          properties:
+            multiplierValue:
+              type: number
+              description: the multiplier factor used to multiply collected points.
+        redeemBonus:
+          title: RedeemBonus
+          type: object
+          properties:
+            applyOnce:
+              title: Indicates if this bonus only applies to the first eligible redeem transaction. Defaults to true.
+              type: boolean
+            applyPerReward:
+              title: Indicates if this bonus is applied per reward. Defaults to false. Optional for transactions of type ''REDEEM_ACTIVE'', ignored for all other transaction types.
+              type: boolean
+            bonusPoints:
+              title: The amount of bonus points to award to a collecting customer for redeeming a reward.
+              type: integer
+              format: int32
+        basketCalculationPurchasedValue:
+          title: BasketCalculationPurchasedValue
+          type: object
+          properties:
+            spendPerPoint:
+              type: integer
+              description: 'The amount of money required per point, specified in the retailers currency. For example, if the retailer uses euros and the ratio is 10 euro per point, you would input 1000.'
+              format: int32
+            maxEligibleSpend:
+              type: integer
+              description: 'Maximum eligible spend amount (in cents, or the base currency denomination, such as pesos)'
+              format: int32
+        basketCalculationCheckout:
+          title: BasketCalculationCheckout
+          type: object
+          properties:
+            minimumSpend:
+              type: integer
+              description: 'The minimum total spend per receipt, specified in the retailers currency. If configured, the collecting customer will only receive checkout points if they spend equal or more than this amount on this receipt.'
+              format: int32
+            checkoutPoints:
+              type: integer
+              description: Points awarded for checkout.
+              format: int32
+        basketCalculationBonusProducts:
+          type: object
+          properties:
+            bonusPoints:
+              type: integer
+              description: The amount of bonus points for this product.
+              format: int32
+            maximumTimesAwarded:
+              type: integer
+              description: The maximum number of times bonus points for this product may be awarded.
+              format: int32
+            minimumBuyQuantity:
+              type: integer
+              description: The minimum amount of this product that a shopper must buy before bonus points may be awarded.
+              format: int32
+
+    V1PromotionListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/V1PromotionResponse'
+
+    BonusPointOfferResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the Bonus Point Offer
+        title:
+          type: string
+          description: Name of the Bonus Point Offer
+        eans:
+          type: array
+          description: EANs of the Bonus Point Offer products
+          items:
+            type: string
+        points:
+          type: integer
+          description: Amount of points that a collecting customer receives when purchasing a valid and active Bonus Point Offer.
+        price:
+          type: integer
+          description: Price of the Bonus Point Offer.
+        quantity:
+          type: string
+          description: Defines the required quantity or size to buy of a product to receive the Bonus Point Offer, for example 2 kg, 6-pack or 250 ml. The product eligible for a Bonus Point Offer is defined by the EAN in the "eans" property. The "quantity" property is used to display the quantity or size in the app.
+        description:
+          type: string
+          description: Description of the Bonus Point Offer.
+        imageId:
+          type: string
+          description: ID of the image for the Bonus Point Offer.
+        channelIds:
+          type: array
+          description: Channel ids of the Bonus Point Offer.
+          items:
+            type: string
+
+    CurrentActionPeriodBonusPointOffer:
+      type: object
+      properties:
+        actionPeriods:
+          type: array
+          description: The currently active action periods.
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the action period.
+              title:
+                type: string
+                description: Title of the action period.
+              startDate:
+                type: string
+                description: Start date of action period (ISO8601 format).
+              endDate:
+                type: string
+                description: End date of action period (ISO8601 format).
+              order:
+                type: string
+                description: Position of the action period in relation to other currently active action periods.
+              groups:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: ID of the Bonus Point Offer group.
+                    title:
+                      type: string
+                      description: Title of the Bonus Point Offer group.
+                    order:
+                      type: number
+                      description: Order of the Bonus Point Offer group within its action period.
+                    description:
+                      type: string
+                      description: Description of the Bonus Point Offer group.
+              promotions:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BonusPointOfferResponse'
+
+    BonusPointOffer:
+      type: object
+      properties:
+        promotion:
+          $ref: '#/components/schemas/BonusPointOfferResponse'
+
+    BonusPointGroup:
+      type: object
+      properties:
+        promotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BonusPointOfferResponse'
+
+    PeriodDateResponse:
+      type: object
+      required: [startDate, endDate]
+      properties:
+        startDate:
+          type: string
+          example: "2020-07-12T13:14:15.000Z"
+          description: 'The start date of an specific period (ISO8601 format).'
+        endDate:
+          type: string
+          example: "2021-07-12T13:14:15.000Z"
+          description: 'The end date of an specific period (ISO8601 format).'
+
+    ValidationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - Invalid request
+        message:
+          type: string
+          enum:
+            - The request failed because it contained an invalid value.
+    NotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - program_not_found
+            - transaction_not_found
+            - retailer_not_found
+            - promotion_not_found
+            - endpoint_not_found
+            - medium_not_found
+        message:
+          type: string
+          enum:
+            - Program not found.
+            - Transaction could not be found.
+            - Retailer could not be found.
+            - Promotion could not be found.
+            - The endpoint [some endpoint] could not be found.
+            - The medium could not be found.
+    UnauthorizedError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - Unauthorized request
+        message:
+          type: string
+          enum:
+            - The user is not authorized to make the request.
+    MethodNotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - method_not_found
+        message:
+          type: string
+          enum:
+            - The endpoint does not support the method used.
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - unsupported_media_type
+        message:
+          type: string
+          enum:
+            - The media type is unsupported; please specify a Content-Type header.
+    GenericError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: The error code.
+          enum:
+            - generic_error
+        error_description:
+          type: string
+          description: The description of the error.
+          enum:
+            - A generic error occurred. Please try again later.
+    MediumNotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The error code.
+          enum:
+            - medium_not_found
+        message:
+          type: string
+          description: The description of the error.
+          enum:
+            - This mediumId or marketingId is already registered with the program
+    FileNotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The error code.
+          example: ResourceNotFound
+        message:
+          type: string
+          description: The error message.
+    EndOfCampaignError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        metadata:
+          type: object
+          properties:
+            campaignEndDate:
+              type: string
+              description: The campaign's end date. This is the date known as the front end program end date.
+            contentPage:
+              type: object
+              description: The content of the end of campaign file that is to be shown to the end user.
+
+    ReadinessResponse:
+      type: object
+      description: Readiness dependency
+      properties:
+        status:
+          type: string
+        uri:
+          type: string
+        timestamp:
+          type: string
+        duration:
+          type: number
+        successes:
+          type: array
+          items:
+            type: string
+        failures:
+          type: array
+          items:
+            type: string
+        errors:
+          type: array
+          items:
+            type: string
+        info:
+          type: object
+        name:
+          type: string
+    LivenessResponse:
+      type: object
+      description: Host and process health information
+      properties:
+        version:
+          type: string
+          description: The version of the deployed service
+        os:
+          type: object
+          description: Operating System generic and load information
+          properties:
+            hostname:
+              type: string
+              description: Host name
+              example: loyalty-otp-service-v4
+            type:
+              type: string
+              description: Operating system type
+              example: Darwin
+            platform:
+              type: string
+              description: Operating system platform
+              example: darwin
+            arch:
+              type: string
+              description: Operating system architecture
+              example: x64
+            release:
+              type: string
+              description: Operating system version
+              example: 17.6.0
+            uptime:
+              type: string
+              description: Server uptime
+              example: 11 days
+            cpu:
+              type: object
+              description: CPU informations
+              properties:
+                cores:
+                  type: string
+                  description: Number of CPU cores on the server
+                  example: 8
+                loadavg:
+                  type: array
+                  description: Average CPU load
+                  items:
+                    type: number
+                  example:
+                    - 2.50048828125
+                    - 2.20068359375
+                    - 2.0595703125
+            memory:
+              type: object
+              description: Memory informations
+              properties:
+                total:
+                  type: string
+                  description: Total memory available
+                  example: 17.2 GB
+                free:
+                  type: string
+                  description: Free memory available
+                  example: 702 MB
+        process:
+          type: object
+          description: Process information
+          properties:
+            pid:
+              type: number
+              description: Total memory available
+              example: 73950
+            memory:
+              type: object
+              description: Memory informations
+              properties:
+                rss:
+                  type: string
+                  description: Resident set size
+                  example: 101 MB
+                heapTotal:
+                  type: string
+                  description: Total heap size
+                  example: 71.8 MB
+                heapUsed:
+                  type: string
+                  description: Actually used heap size
+                  example: 40 MB
+            uptime:
+              type: string
+              description: Process uptime
+              example: a few seconds

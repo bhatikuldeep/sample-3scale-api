@@ -1,0 +1,18 @@
+{
+    "policies_config": [{
+            "name": "default_credentials",
+            "version": "builtin",
+            "configuration": {
+                "auth_type": "user_key",
+                "user_key": "00c9ed39e3df6732dd3745b521e55596"
+            },
+            "enabled": true
+        },
+        {
+            "name": "apicast",
+            "version": "builtin",
+            "configuration": {},
+            "enabled": true
+        }
+    ]
+}

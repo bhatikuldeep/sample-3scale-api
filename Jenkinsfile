@@ -18,29 +18,31 @@
 
 def targetSystemName = "api"
 def targetInstance = "3scale-saas"
-def privateBaseURL = "https://mocktarget.apigee.net"
+def privateBaseURL = "http://loyalty-customer-experience-api:8080"
 def testUserKey = "azerty1234567890"
-def developerAccountId = params.DEVELOPER_ACCOUNT_ID
+def developerAccountId = "2445582796064"
 
 /*
  * Only needed when using self-managed APIcast or on-premises installation of 3scale
  */
-def publicStagingBaseURL = "http://apicast-staging-api-lifecycle.192.168.64.12.nip.io" // change to something such as "http://my-staging-api.example.test" for self-managed APIcast or on-premises installation of 3scale
-def publicProductionBaseURL = "http://apicast-production-api-lifecycle.192.168.64.12.nip.io" // change to something such as "http://my-production-api.example.test" for self-managed APIcast or on-premises installation of 3scale
+def publicStagingBaseURL = "http://apicast-3scalegateway.192.168.64.12.nip.io:80" // change to something such as "http://my-staging-api.example.test" for self-managed APIcast or on-premises installation of 3scale
+def publicProductionBaseURL = "http://apicast-3scalegateway.192.168.64.12.nip.io:80" // change to something such as "http://my-production-api.example.test" for self-managed APIcast or on-premises installation of 3scale
 
 node() {
 
     stage("Fetch OpenAPI") {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
-    curl -sfk -o swagger.yaml https://raw.githubusercontent.com/bhatikuldeep/sample-3scale-api/master/specs/swagger.yaml
+    curl -sfk -o loyalty-customer-experience-api.yml https://raw.githubusercontent.com/bhatikuldeep/sample-3scale-api/master/specs/loyalty-customer-experience-api.yml
     oc delete configmap openapi --ignore-not-found
-    oc create configmap openapi --from-file="swagger.yaml"
+    oc create configmap openapi --from-file="loyalty-customer-experience-api.yml"
     """
   }
 
   stage("Import OpenAPI") {
-    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "/specs/swagger.yaml", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
+    //def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "/specs/loyalty-customer-experience-api.yml", "--override-private-base-url=${privateBaseURL}", "-t", targetSystemName ]
+    //3scale import openapi -d 3scale-saas -t api --override-private-base-url=http://loyalty-customer-experience-api:8080 --default-credentials-userkey=user_key --override-public-basepath=/consumer loyalty-customer-experience-api.yml 
+    def tooboxArgs = [ "3scale", "import", "openapi", "-d", targetInstance, "-t", "api", "--override-private-base-url=${privateBaseURL}", "--default-credentials-userkey=${testUserKey}", "--override-public-basepath=/consumer", "/specs/loyalty-customer-experience-api.yml"]
     if (publicStagingBaseURL != null) {
         tooboxArgs += "--staging-public-base-url=${publicStagingBaseURL}"
     }
@@ -80,6 +82,10 @@ node() {
   
   stage("Promote to production") {
     runToolbox([ "3scale", "proxy", "promote", targetInstance, targetSystemName ])
+  }
+
+  stage("Publish ActiveDocs") {
+    runToolbox([ "3scale", "activedocs", "apply", targetInstance, , "-p" ])
   }
 }
 
