@@ -38,7 +38,7 @@ node() {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
     oc delete configmap apirootfolder --ignore-not-found
-    oc create configmap apirootfolder --from-file="=$(pwd)"
+    oc create configmap apirootfolder --from-file="""$(pwd)"""
     """
   }
 
