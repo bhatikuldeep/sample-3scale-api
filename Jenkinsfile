@@ -30,12 +30,15 @@ def publicProductionBaseURL = "http://apicast-3scalegateway.192.168.64.12.nip.io
 
 node() {
 
+    stage('Checkout Source') {
+    checkout scm
+  }
+
     stage("Fetch OpenAPI") {
     // Fetch the OpenAPI Specification file and provision it as a ConfigMap
     sh """
-    curl -sfk -o loyalty-customer-experience-api.yml https://raw.githubusercontent.com/bhatikuldeep/sample-3scale-api/master/specs/loyalty-customer-experience-api.yml
     oc delete configmap openapi --ignore-not-found
-    oc create configmap openapi --from-file="loyalty-customer-experience-api.yml"
+    oc create configmap openapi --from-file="specs/loyalty-customer-experience-api.yml"
     """
   }
 
@@ -53,7 +56,9 @@ node() {
   }
   
   stage("Create an Application Plan") {
-    runToolbox([ "3scale", "application-plan", "apply", targetInstance, targetSystemName, "test", "-n", "Test Plan", "--default" ])
+    //runToolbox([ "3scale", "application-plan", "apply", targetInstance, targetSystemName, "test", "-n", "Test Plan", "--default" ])
+    runToolbox([ "3scale", "application-plan", "import", targetInstance, targetSystemName, "--file=config/application-plan.yaml"])
+    //3scale application-plan import icemobile-dev api --file=config/application-plan.yaml
   }
 
   stage("Create an Application") {
